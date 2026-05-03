@@ -1,4 +1,3 @@
-# simple_agent.py
 import asyncio
 import os
 from agent_framework import Agent
@@ -12,16 +11,16 @@ load_dotenv()
 async def main():
     client = FoundryChatClient(
         project_endpoint=os.environ["FOUNDRY_PROJECT_ENDPOINT"],
-        model=os.environ["FOUNDRY_MODEL"],
+        model=os.environ["MODEL_DEPLOYMENT_NAME"],
         credential=AzureCliCredential(),
     )
 
     agent = client.as_agent(
-        name="AssistantAgent",
+        name="pk_assistantAgent",
         instructions="You are a helpful assistant.",
     )
 
-    result = await agent.run("Explain what Microsoft Foundry does in 2 sentences.")
+    result = await agent.run("Explain what UNESCO does in 2 sentences.")
     print(result)
 
 asyncio.run(main())

@@ -1,4 +1,4 @@
-#!C:\MSPython\MSFoundryMSAFramework\.pkvenv\Scripts\python.exe
+#!C:\MSPython\MSAgent\MSFoundryAgentFramework\.pkvenv\Scripts\python.exe
 
 import sys
 import json

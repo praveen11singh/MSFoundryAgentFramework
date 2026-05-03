@@ -38,11 +38,11 @@ from azure.ai.agents.models import (
 )
 
 load_dotenv()
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
-logger = logging.getLogger(__name__)
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format="%(asctime)s [%(levelname)s] %(message)s",
+# )
+# logger = logging.getLogger(__name__)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -63,7 +63,7 @@ def get_client() -> AgentsClient:
             "Format: https://<aiservices-id>.services.ai.azure.com/api/projects/<project-name>"
         )
     client = AgentsClient(endpoint=endpoint, credential=DefaultAzureCredential())
-    logger.info("AgentsClient initialized.")
+   
     return client
 
 
@@ -71,7 +71,7 @@ def get_client() -> AgentsClient:
 # 2. BASIC AGENT
 # ─────────────────────────────────────────────────────────────────────────────
 
-def demo_basic_agent(client: AgentsClient) -> None:
+def pk_basic_agent(client: AgentsClient) -> None:
     """Create agent → thread → message → run → read response → cleanup."""
     model = os.environ["MODEL_DEPLOYMENT_NAME"]
 
@@ -80,14 +80,14 @@ def demo_basic_agent(client: AgentsClient) -> None:
         name="basic-assistant",
         instructions="You are a helpful assistant. Answer concisely and accurately.",
     )
-    logger.info("Agent created: %s", agent.id)
+    # logger.info("Agent created: %s", agent.id)
 
     thread: AgentThread = client.threads.create()
 
     client.messages.create(
         thread_id=thread.id,
         role=MessageRole.USER,
-        content="What is Azure AI Foundry in two sentences?",
+        content="What is UNESCO in two sentences?",
     )
 
     run: ThreadRun = client.runs.create_and_process(
@@ -102,11 +102,12 @@ def demo_basic_agent(client: AgentsClient) -> None:
         )
         print("\n[Basic Agent]\n", last.text.value if last else "(no response)")
     else:
-        logger.error("Run failed: %s | %s", run.status, run.last_error)
+        # logger.error("Run failed: %s | %s", run.status, run.last_error)
+        pass            
 
     client.threads.delete(thread.id)
     client.delete_agent(agent.id)
-    logger.info("Basic agent demo complete.")
+    # logger.info("Basic agent demo complete.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -164,11 +165,11 @@ def send_email(to: str, subject: str, body: str) -> str:
     Returns:
         JSON string with send status and message ID.
     """
-    logger.info("Sending email to %s: %s", to, subject)
+    # logger.info("Sending email to %s: %s", to, subject)
     return json.dumps({"status": "sent", "message_id": f"msg_{int(time.time())}"})
 
 
-def demo_function_tools(client: AgentsClient) -> None:
+def pk_function_tools(client: AgentsClient) -> None:
     """Agent with FunctionTool — auto-executes tool calls via create_and_process."""
     model = os.environ["MODEL_DEPLOYMENT_NAME"]
 
@@ -211,14 +212,14 @@ def demo_function_tools(client: AgentsClient) -> None:
 
     client.threads.delete(thread.id)
     client.delete_agent(agent.id)
-    logger.info("Function tools demo complete.")
+    # logger.info("Function tools demo complete.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 4. CODE INTERPRETER
 # ─────────────────────────────────────────────────────────────────────────────
 
-def demo_code_interpreter(client: AgentsClient, csv_path: str | None = None) -> None:
+def pk_code_interpreter(client: AgentsClient, csv_path: str | None = None) -> None:
     """Agent with CodeInterpreterTool. Saves any generated images locally."""
     model = os.environ["MODEL_DEPLOYMENT_NAME"]
 
@@ -232,7 +233,7 @@ def demo_code_interpreter(client: AgentsClient, csv_path: str | None = None) -> 
                 purpose="assistants"
             )
         file_ids.append(uploaded.id)
-        logger.info("Uploaded file: %s -> %s", csv_path, uploaded.id)
+        # logger.info("Uploaded file: %s -> %s", csv_path, uploaded.id)
 
     agent = client.create_agent(
         model=model,
@@ -276,25 +277,26 @@ def demo_code_interpreter(client: AgentsClient, csv_path: str | None = None) -> 
                         out = f"output_{block.image_file.file_id}.png"
                         with open(out, "wb") as f:
                             f.write(img_bytes)
-                        logger.info("Image saved -> %s", out)
+                        # logger.info("Image saved -> %s", out)
     else:
-        logger.warning("Run did not complete. Status: %s", run.status)
+        # logger.warning("Run did not complete. Status: %s", run.status)
         if hasattr(run, "last_error"):
-            logger.error("Run error: %s", run.last_error)
+            # logger.error("Run error: %s", run.last_error)
+            pass
 
     # Cleanup
     client.threads.delete(thread.id)
     client.delete_agent(agent.id)
     for fid in file_ids:
         client.files.delete(fid)
-    logger.info("Code interpreter demo complete.")
+    # logger.info("Code interpreter demo complete.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 5. FILE SEARCH / RAG
 # ─────────────────────────────────────────────────────────────────────────────
 
-def demo_file_search(client: AgentsClient, file_paths: list[str]) -> None:
+def pk_file_search(client: AgentsClient, file_paths: list[str]) -> None:
     """Upload documents to a vector store and query them with FileSearchTool."""
     model = os.environ["MODEL_DEPLOYMENT_NAME"]
 
@@ -353,7 +355,7 @@ def demo_file_search(client: AgentsClient, file_paths: list[str]) -> None:
     client.vector_stores.delete(vector_store.id)
     for fid in file_ids:
         client.files.delete(fid)
-    logger.info("File search demo complete.")
+    # logger.info("File search demo complete.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -381,7 +383,7 @@ class PrintingEventHandler(AgentEventHandler):
         pass
 
 
-def demo_streaming(client: AgentsClient) -> None:
+def pk_streaming(client: AgentsClient) -> None:
     """
     Stream tokens in real-time.
 
@@ -400,7 +402,7 @@ def demo_streaming(client: AgentsClient) -> None:
     client.messages.create(
         thread_id=thread.id,
         role=MessageRole.USER,
-        content="Write a short paragraph about the future of AI.",
+        content="Write a short paragraph about the future of UNESCO.",
     )
 
     print("\n[Streaming Response]")
@@ -414,14 +416,14 @@ def demo_streaming(client: AgentsClient) -> None:
 
     client.threads.delete(thread.id)
     client.delete_agent(agent.id)
-    logger.info("Streaming demo complete.")
+    # logger.info("Streaming demo complete.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 7. MULTI-AGENT ORCHESTRATION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def demo_multi_agent(client: AgentsClient) -> None:
+def pk_multi_agent(client: AgentsClient) -> None:
     """Orchestrator delegates to researcher + writer via ConnectedAgentTool."""
     model = os.environ["MODEL_DEPLOYMENT_NAME"]
 
@@ -464,7 +466,7 @@ def demo_multi_agent(client: AgentsClient) -> None:
     client.messages.create(
         thread_id=thread.id,
         role=MessageRole.USER,
-        content="Write a two-paragraph briefing on the benefits of Azure AI Foundry.",
+        content="Write a two-paragraph briefing on the benefits of  AI in Retail sector.",
     )
 
     run = client.runs.create_and_process(
@@ -481,14 +483,14 @@ def demo_multi_agent(client: AgentsClient) -> None:
     for aid in [orchestrator.id, researcher.id, writer.id]:
         client.delete_agent(aid)
     client.threads.delete(thread.id)
-    logger.info("Multi-agent demo complete.")
+    # logger.info("Multi-agent demo complete.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 8. MULTI-TURN CONVERSATION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def demo_multi_turn(client: AgentsClient) -> None:
+def pk_multi_turn(client: AgentsClient) -> None:
     """Stateful conversation across multiple user messages in one thread."""
     model = os.environ["MODEL_DEPLOYMENT_NAME"]
 
@@ -502,7 +504,7 @@ def demo_multi_turn(client: AgentsClient) -> None:
         messages=[
             ThreadMessageOptions(
                 role=MessageRole.USER,
-                content="My name is Alex and I work on the Azure product team.",
+                content="My name is Praveen and I work on the Azure product team.",
             )
         ]
     )
@@ -526,14 +528,14 @@ def demo_multi_turn(client: AgentsClient) -> None:
 
     client.threads.delete(thread.id)
     client.delete_agent(agent.id)
-    logger.info("Multi-turn demo complete.")
+    # logger.info("Multi-turn demo complete.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 9. STRUCTURED OUTPUT — JSON mode
 # ─────────────────────────────────────────────────────────────────────────────
 
-def demo_structured_output(client: AgentsClient) -> None:
+def pk_structured_output(client: AgentsClient) -> None:
     """Agent that always returns valid JSON, parsed and pretty-printed."""
     model = os.environ["MODEL_DEPLOYMENT_NAME"]
 
@@ -569,7 +571,7 @@ def demo_structured_output(client: AgentsClient) -> None:
 
     client.threads.delete(thread.id)
     client.delete_agent(agent.id)
-    logger.info("Structured output demo complete.")
+    # logger.info("Structured output demo complete.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -579,7 +581,7 @@ def demo_structured_output(client: AgentsClient) -> None:
 #      Then stream() picks it up internally. NEVER pass toolset= to stream().
 # ─────────────────────────────────────────────────────────────────────────────
 
-def demo_full_pipeline(client: AgentsClient) -> None:
+def pk_full_pipeline(client: AgentsClient) -> None:
     """FunctionTool + CodeInterpreter combined, run with real-time streaming."""
     model = os.environ["MODEL_DEPLOYMENT_NAME"]
 
@@ -627,7 +629,7 @@ def demo_full_pipeline(client: AgentsClient) -> None:
 
     client.threads.delete(thread.id)
     client.delete_agent(agent.id)
-    logger.info("Full pipeline demo complete.")
+    #  logger.info("Full pipeline demo complete.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -658,18 +660,18 @@ def safe_run(
 
             if run.status == RunStatus.FAILED:
                 err = run.last_error
-                logger.error("Run failed [%s]: %s", err.code, err.message)
+                # logger.error("Run failed [%s]: %s", err.code, err.message)
                 if err.code == "rate_limit_exceeded":
                     time.sleep(2 ** attempt)
                     continue
                 return None
 
             if run.status in (RunStatus.CANCELLED, RunStatus.EXPIRED):
-                logger.warning("Run ended: %s", run.status)
+                # logger.warning("Run ended: %s", run.status)
                 return None
 
         except HttpResponseError as exc:
-            logger.error("HTTP %s: %s", exc.status_code, exc.message)
+            # logger.error("HTTP %s: %s", exc.status_code, exc.message)
             if exc.status_code == 429:
                 time.sleep(2 ** attempt)
                 continue
@@ -680,7 +682,7 @@ def safe_run(
             time.sleep(1)
             continue
 
-    logger.error("Exhausted %d retries.", max_retries)
+    # logger.error("Exhausted %d retries.", max_retries)
     return None
 
 
@@ -697,22 +699,26 @@ def cleanup(
         try:
             client.delete_agent(aid)
         except HttpResponseError as e:
-            logger.warning("Could not delete agent %s: %s", aid, e.message)
+            # logger.warning("Could not delete agent %s: %s", aid, e.message)
+            pass
     for tid in (thread_ids or []):
         try:
             client.threads.delete(tid)
         except HttpResponseError as e:
-            logger.warning("Could not delete thread %s: %s", tid, e.message)
+            # logger.warning("Could not delete thread %s: %s", tid, e.message)
+            pass
     for fid in (file_ids or []):
         try:
             client.files.delete(fid)
         except HttpResponseError as e:
-            logger.warning("Could not delete file %s: %s", fid, e.message)
+            # logger.warning("Could not delete file %s: %s", fid, e.message)
+            pass
     for vid in (vector_store_ids or []):
         try:
             client.vector_stores.delete(vid)
         except HttpResponseError as e:
-            logger.warning("Could not delete vector store %s: %s", vid, e.message)
+            # logger.warning("Could not delete vector store %s: %s", vid, e.message)
+            pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -722,42 +728,42 @@ def cleanup(
 def main() -> None:
     client = get_client()
 
-    bar = "=" * 56
-    print(f"\n{bar}")
-    print("  Microsoft Agent Framework  |  azure-ai-agents 1.1.0")
-    print(bar)
+        # bar = "=" * 56
+        # print(f"\n{bar}")
+        # print("  Microsoft Agent Framework  |  azure-ai-agents 1.1.0")
+        # print(bar)
 
     print("\n-- 1. Basic Agent --")
-    demo_basic_agent(client)
+    pk_basic_agent(client)
 
     print("\n-- 2. Function Tools --")
-    demo_function_tools(client)
+    pk_function_tools(client)
 
     print("\n-- 3. Code Interpreter --")
-    demo_code_interpreter(client, csv_path="synthetic_500_quarterly_results.csv")  # Provide a real CSV path or set to None to skip file upload    
+    pk_code_interpreter(client, csv_path="synthetic_500_quarterly_results.csv")  # Provide a real CSV path or set to None to skip file upload    
 
     # Provide real file paths to test RAG:
     # print("\n-- 4. File Search / RAG --")
-    # demo_file_search(client, file_paths=["manual.pdf", "faq.txt"])
+    # pk_file_search(client, file_paths=["manual.pdf", "faq.txt"])
 
     print("\n-- 5. Streaming --")
-    demo_streaming(client)
+    pk_streaming(client)
 
     print("\n-- 6. Multi-Agent Orchestration --")
-    demo_multi_agent(client)
+    pk_multi_agent(client)
 
     print("\n-- 7. Multi-Turn Conversation --")
-    demo_multi_turn(client)
+    pk_multi_turn(client)
 
     print("\n-- 8. Structured Output (JSON mode) --")
-    demo_structured_output(client)
+    pk_structured_output(client)
 
     print("\n-- 9. Full Pipeline (function + code interpreter + streaming) --")
-    demo_full_pipeline(client)
+    pk_full_pipeline(client)
 
-    print(f"\n{bar}")
+    # print(f"\n{bar}")
     print("  All demos complete.")
-    print(f"{bar}\n")
+    # print(f"{bar}\n")
 
 
 if __name__ == "__main__":
